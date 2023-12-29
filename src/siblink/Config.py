@@ -16,7 +16,6 @@ class ScriptHandler:
     to a script. Local scripts or script names should be saved in config.json within siblink and scripts.
     :arg script_name: str: The script to be converted
     """
-    print(Config.raw, type(Config.raw))
     parent = Config.raw["siblink"]["scripts"].get("$parent", None)
 
     if not script_name in Config.raw["siblink"]["scripts"]:

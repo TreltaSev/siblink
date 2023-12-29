@@ -1,65 +1,10 @@
-from pathlib import Path
-from typing import Optional, Any
 import os
 import json
-from pyucc import colors, console
-
-
-config_template = {
-    "siblink": {
-        "venv": "./venv",
-        "scripts": {
-            "$parent": "./scripts",
-            "initial": "$/initial.py",
-            "start": "$/start.py",
-            "install": "$/install_script.py",
-            "clean": "$/clean.py",
-            "test": "$/test.py"
-        }
-    },
-    "trelbot": {
-        "token": "$yourtokenhere"
-    },
-    "backend": {
-        "port": 2817,
-        "ssl": "./ssl",
-        "blueprints": {
-            "$parent": "./backend/api",
-            "@me": {
-                "location": "$/@me"
-            },
-            "@others": {
-                "location": "$/@others"
-            }
-        }
-    }
-}
-
-
-class HasRequiredValues:
-
-  def __init__(self, populate: dict, RequiredKeys: dict[str, Any]) -> None:
-    """
-    Object which contains two variables to check and look over inputted dictionary information.
-    Checks if values exists within the supplied dictionary and also checks the values type.
-    If one or more values are missing then a `NotImplementedError` will be raised, otherwise, all good!
-
-    :arg populate: dict: The dictionary which will be checked for values
-    :arg RequiredKeys: dict[str, any]: A dictionary or object containing string key value pairs. The values must be able to be used in isinstance
-    """
-
-    for k, v in populate.items():
-      if k in RequiredKeys:
-        key_type = RequiredKeys.pop(k)
-        if not isinstance(v, key_type):
-          raise TypeError(f"\"{k}\" in RequiredKeys is not of type {key_type} instead its {v}")
-        setattr(self, k, v)
-
-    for missed_child in RequiredKeys.keys():
-      print(f"Missing the required value {missed_child}")
-
-    if RequiredKeys:
-      raise NotImplementedError("Missing one or more required values.")
+import glob
+import collections
+from pathlib import Path
+from pyucc import console, colors
+from typing import Any, List, Union
 
 
 class ScriptHandler:
@@ -72,9 +17,9 @@ class ScriptHandler:
     :arg script_name: str: The script to be converted
     """
 
-    parent = Config.siblink.scripts.get("$parent", None)
+    parent = Config.raw["siblink"]["scripts"].get("$parent", None)
 
-    if not script_name in Config.siblink.scripts:
+    if not script_name in Config.raw["siblink"]["scripts"]:
       path: Path = Path(script_name)
 
       if not path.exists():
@@ -83,7 +28,7 @@ class ScriptHandler:
 
       return path
 
-    script_path_in_config: str = Config.siblink.scripts.get(script_name)
+    script_path_in_config: str = Config.raw["siblink"]["scripts"].get(script_name)
     if parent is not None:
       script_path_in_config = script_path_in_config.replace("$", parent, 1)
 
@@ -96,66 +41,77 @@ class ScriptHandler:
     return script_path
 
 
-class BlueprintHandler:
-
-  @classmethod
-  def get_all(cls) -> list[Path]:
-    """
-    Finds all blueprints mentioned or referenced within `config.json`, these blueprints are then parsed and added
-    to a list which this method will return.
-    """
-    blueprints = dict(Config.backend.blueprints)
-    parent = blueprints.pop("$parent", None)
-    buff: list[str] = []
-
-    for blueprint_data in blueprints.values():
-      location = blueprint_data.get("location")
-
-      if parent:
-        location = location.replace("$", parent, 1)
-
-      if not location.endswith(".py"):
-        location += ".py"
-
-      location: Path = Path(location)
-
-      if not location.exists():
-        console.error(f"Location {location.absolute()} does not exist.")
-        return
-
-      buff.append(location)
-
-    return buff
-
-
 class Config:
+  """
+  Handle, Create, Read, and Generate Config Files
+  used interchangeably between programs.
+  """
 
-  os_switch: str = 'Scripts' if os.name == 'nt' else 'bin'
+  os_switch: str = 'Scripts' if os.name == "nt" else "bin"
 
   def __init__(self) -> None:
     if not hasattr(Config, "loaded"):
-      Config.__load__()
+      setattr(Config, "ScriptHandler", ScriptHandler)
+      Config.__get_raw__()
 
   @classmethod
-  def __generate__(cls) -> None:
+  def deep_update(cls, to_update: Union[dict, collections.abc.Mapping], data: Union[dict, collections.abc.Mapping]) -> dict:
     """
-    Generate a :file:`./config.json` file which takes from :file:`./config.default` if it exists, else `{}`. As of right now, :file:`./config.default` is of the json format, but im thinking
-    of changing it into another file format such as yaml... Its redundant but maybe it holds water.
+    Recursive updating of dictionaries, used in the :method:`__get_raw__()` method.
+    :arg to_update: Union[dict, collections.abc.Mapping]: The dictionary that will be updated
+    :arg data: Union[dict, collections.abc.Mapping]: The dictionary that contains the data that will be implanted into :variable:`to_update`
     """
-    json_out: Optional[dict] = {}
-    config_default_path: Path = Path("./config.default")
-    config_json_path: Path = Path("./config.json")
+    for k, v in data.items():
+      if isinstance(v, collections.abc.Mapping):
+        to_update[k] = cls.deep_update(to_update.get(k, {}), v)
+      else:
+        to_update[k] = v
+    return to_update
 
-    if cls.__exists__("./config.default"):
-      try:
-        json_out = json.loads(config_default_path.read_text())
-      except json.JSONDecodeError:
-        pass
+  @classmethod
+  def __get_raw__(cls):
+    """
+    Gets all package default.json files and project default.json files and merges them all into one dictionary.
+    This dictionary is saved to :variable:`cls.raw` which can be access by a setter method.
+    """
+    cls.out_default: dict = {}
+    cls.package_root = Path(__file__).parent
 
-    if not cls.__exists__("./config.json"):
-      config_json_path.write_text(json.dumps(json_out, indent=4))
+    # Check for venv
+    if not cls.__exists__("./venv"):
+      console.error(f"No \"Venv\" dir found in root, this is needed to run siblink at all...")
+      quit()
 
-    return json_out
+    # Set Values
+    cls.raw = {}
+    cls.venv = Path("./venv")
+    cls.root = cls.venv.parent
+    cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
+    cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
+
+    # Get default.json files from package
+    package_defaults: List[str] = glob.glob(f"{cls.package_root / 'defaults'}/*.default.json")
+    for package_default in package_defaults:
+      merge = cls.__get_dict__(package_default, "package defaults")
+      cls.out_default.update(merge)
+
+    # Get default.json files from project
+    project_defaults: List[str] = glob.glob(f"{cls.root / 'defaults'}/*.default.json")
+    for project_default in project_defaults:
+      merge = cls.__get_dict__(project_default, "project defaults")
+      cls.out_default.update(merge)
+
+    res: Union[dict, None] = {}
+
+    if cls.__exists__("./config.json"):
+      res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)
+      if res is None:
+        console.warn(f"Failed to parse {(cls.root / 'config.json').absolute()}... Overwriting")
+      res = {}
+      Path("./config.json").write_text("{}")
+      cls.raw = cls.deep_update(cls.out_default, res)
+
+    Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
 
   @classmethod
   def __exists__(cls, path: str) -> bool:
@@ -166,77 +122,23 @@ class Config:
     return Path(path).exists()
 
   @classmethod
-  def __values__(cls) -> any:
+  def __get_dict__(cls, path: Union[Path, str], caller: str = "", raise_on_fail: bool = False, none_on_fail: bool = False) -> dict:
     """
-    Supposed to simulate cls.__dict__ but without all the other methods, used to represent its core values.
+    Attempts to decode a json file, returns Nothing on fail if :arg:`none_on_fail` is True, raises an error on fail if :arg:`raise_on_fail` is True.
+    :arg path: Union[Path, str]: Path object of json file
+    :arg caller: str = "": Identifier used in debugging and error handling
+    :arg raise_on_fail: bool = False: Determines whether this method raises an error if the json decoding fails
+    :arg none_on_fail: bool = False: Determines whether this method returns a NoneType object if the json decoding fails
     """
-    keys = ["siblink", "trelbot", "backend"]
-    buff: dict = {}
-    for key in keys:
-      if key in cls.__dict__:
-        buff.__setitem__(key, cls.__dict__.get(key).__dict__)
-    return buff
-
-  @classmethod
-  def __settle__(cls) -> None:
-    """
-    Caches important paths into this object, these paths include `root`, `siblink_venv`, `python_exe`, and `pip_exe`
-    """
-
-    siblink_venv: Path = Path(cls.siblink.venv)
-
-    if not siblink_venv.exists():
-      console.error(f"{colors.vibrant_violet}venv/{colors.vibrant_red} value specified doesn't exist... {colors.vibrant_yellow}{siblink_venv.absolute()}{colors.vibrant_red}")
-      quit()
-
-    python_exe: Path = siblink_venv / cls.os_switch / "python.exe"
-    pip_exe: Path = siblink_venv / cls.os_switch / "pip.exe"
-
-    if not python_exe.exists():
-      console.error(f"{colors.vibrant_violet}venv/python.exe{colors.vibrant_red} is not discoverable with current {colors.vibrant_yellow}configuration{colors.vibrant_red}")
-      quit()
-
-    if not pip_exe.exists():
-      console.error(f"{colors.vibrant_violet}venv/pip.exe{colors.vibrant_red} is not discoverable with current {colors.vibrant_yellow}configuration{colors.vibrant_red}")
-      quit()
-
-    cls.root = siblink_venv.parent
-    cls.siblink_venv = siblink_venv
-    cls.python_exe = python_exe
-    cls.pip_exe = pip_exe
-
-  @classmethod
-  def __load__(cls, path: Optional[str] = None) -> dict:
-    """
-    Loads the config.json file if it exists, if not it will create it. The data from
-    the config.json file will be saved in memory and converted into an object which can be used anywhere
-    :arg path: Optional[str] = None: Path of the `config.json` file, defaults to none. If no path is specified, will use "./config.json" as path.
-    """
-    cls.BlueprintHandler = BlueprintHandler
-    cls.ScriptHandler = ScriptHandler
-    cls.loaded: bool = True
-
-    cls.__generate__()
-    path: Path = Path("./config.json")
-
-    ConfigAsDict: dict = json.loads(path.read_text(encoding="UTF-8"))
-
-    cls.siblink = HasRequiredValues(ConfigAsDict.get("siblink"), {
-        "venv": str,
-        "scripts": dict
-    })
-
-    cls.trelbot = HasRequiredValues(ConfigAsDict.get("trelbot"), {
-        "token": str
-    })
-
-    cls.backend = HasRequiredValues(ConfigAsDict.get("backend"), {
-        "port": int,
-        "ssl": str,
-        "blueprints": dict
-    })
-
-    cls.__settle__()
+    try:
+      return json.loads(Path(path).read_text())
+    except json.JSONDecodeError as json_error:
+      console.error(f"Failed to parse json in {Path(path).name} of {caller}")
+      if raise_on_fail:
+        raise json_error
+      if none_on_fail:
+        return None
+      return {}
 
 
 Config()

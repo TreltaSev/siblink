@@ -85,8 +85,16 @@ def install():
   console.info(f"Installing siblink to global path")
   os.system(f"pip install {__git__}")
 
-  console.info(f"Installing siblink to {Config.siblink_venv.absolute()}...")
+  console.info(f"Installing siblink to {Config.venv.absolute()}...")
   os.system(f"{Config.pip_exe.absolute()} install {__git__}")
+
+
+@app.command(name="test")
+def test():
+  print("testing")
+  print(Config.siblink.venv)
+  print(Config.siblink.scripts)
+  print(Config.siblink.scripts.__dict__)
 
 
 def main():

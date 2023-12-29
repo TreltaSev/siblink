@@ -25,6 +25,7 @@ setuptools.setup(
     install_requires=[
         'pyucc',
         'typer'
-    ]
+    ],
+    package_data={"siblink": ["**/*.default.json"]}
 
 )

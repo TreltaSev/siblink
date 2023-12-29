@@ -6,7 +6,7 @@ from typing import Optional, Union, List, Any
 import typer
 from pyucc import console, colors, symbols
 from typing_extensions import Annotated
-from . import Config
+from . import Config, __git__
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -25,7 +25,8 @@ def run(run_path: str, args: List[str] = []):
   if run_path.is_dir():
     main_file = glob.glob(str(run_path / "main.py"))
     if len(main_file) == 0:
-      raise FileNotFoundError(f"No main.py file found in {run_path.absolute()}")
+      raise FileNotFoundError(
+          f"No main.py file found in {run_path.absolute()}")
     command += main_file[0]
 
   command += f" {' '.join(args)}"
@@ -73,6 +74,19 @@ def pip_dump(requirements_txt_path: Optional[str] = "./requirements.txt"):
   Runs pip freeze > command
   """
   __pip_dumping__(requirements_txt_path=requirements_txt_path)
+
+
+@app.command(name="install")
+def install():
+  """
+  Installs the latest version of siblink into a python project's virtual environment as well as the global python environment
+  """
+
+  console.info(f"Installing siblink to global path")
+  os.system(f"pip install {__git__}")
+
+  console.info(f"Installing siblink to {Config.siblink_venv.absolute()}...")
+  os.system(f"{Config.pip_exe.absolute()} install {__git__}")
 
 
 def main():

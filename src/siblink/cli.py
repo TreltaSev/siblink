@@ -7,6 +7,7 @@ import typer
 from pyucc import console, colors, symbols
 from typing_extensions import Annotated
 from . import Config, __git__
+import subprocess
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
@@ -82,9 +83,9 @@ def install():
   Installs the latest version of siblink into a python project's virtual environment as well as the global python environment
   """
   console.info(f"Installing siblink to global path")
-  os.system(f"pip uninstall siblink & pip install git+{__git__}")
+  subprocess.run(f"pip uninstall -y siblink & pip install git+{__git__}".split(" "), capture_output=True)
   console.info(f"Installing siblink to {Config.venv.absolute()}...")
-  os.system(f"{Config.pip_exe.absolute()} uninstall siblink & {Config.pip_exe.absolute()} install git+{__git__}")
+  subprocess.run(f"{Config.pip_exe.absolute()} uninstall -y siblink & {Config.pip_exe.absolute()} install git+{__git__}".split(" "), capture_output=True)
 
 
 @app.command(name="test")

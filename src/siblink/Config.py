@@ -96,6 +96,12 @@ class Recursed(dict):
         copied[k] = Recursed(v)
     return copied.items()
 
+  def __contains__(self, __key: object) -> bool:
+    """
+    Override `__contains__` method to point towards `self._raw_`
+    """
+    return dict(self._raw_).__contains__(__key)
+
 
 class Config:
   """
@@ -198,6 +204,11 @@ class Config:
       if none_on_fail:
         return None
       return {}
+
+  def __getattribute__(self, __name: str) -> Any:
+    raw = getattr(Config, "raw")
+    if __name in raw:
+      return
 
 
 Config()

@@ -84,12 +84,11 @@ def install(local: bool = False):
 
   console.info(f"Installing siblink to global path")
 
-  __query__ = f"git+{__git__}" if not local else "../../"
-
-  os.system(f"pip install {__query__}")
-
+  __query__ = f"" if not local else "../../"
+  print(f"path: git+{__git__}")
+  os.system(f"pip install git+{__git__}")
   console.info(f"Installing siblink to {Config.venv.absolute()}...")
-  os.system(f"{Config.pip_exe.absolute()} install {__query__}")
+  os.system(f"{Config.pip_exe.absolute()} install git+{__git__}")
 
 
 @app.command(name="test")

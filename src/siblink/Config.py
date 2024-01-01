@@ -103,7 +103,15 @@ class Recursed(dict):
     return dict(self._raw_).__contains__(__key)
 
 
-class Config:
+class ConfigMeta(type):
+  def __getattribute__(self, __name: str) -> Any:
+    raw: Recursed = object.__getattribute__(self, "raw")
+    if __name in raw:
+      return raw.__getattribute__(__name)
+    return super().__getattribute__(__name)
+
+
+class Config(metaclass=ConfigMeta):
   """
   Handle, Create, Read, and Generate Config Files
   used interchangeably between programs.

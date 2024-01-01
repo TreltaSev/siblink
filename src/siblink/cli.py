@@ -77,16 +77,19 @@ def pip_dump(requirements_txt_path: Optional[str] = "./requirements.txt"):
 
 
 @app.command(name="install")
-def install():
+def install(local: bool = False):
   """
   Installs the latest version of siblink into a python project's virtual environment as well as the global python environment
   """
 
   console.info(f"Installing siblink to global path")
-  os.system(f"pip install {__git__}")
+
+  __query__ = __git__ if not local else "../../"
+
+  os.system(f"pip install {__query__}")
 
   console.info(f"Installing siblink to {Config.venv.absolute()}...")
-  os.system(f"{Config.pip_exe.absolute()} install {__git__}")
+  os.system(f"{Config.pip_exe.absolute()} install {__query__}")
 
 
 @app.command(name="test")

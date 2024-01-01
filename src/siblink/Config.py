@@ -5,6 +5,8 @@ import collections
 from pathlib import Path
 from pyucc import console, colors
 from typing import Any, List, Union
+from _collections_abc import dict_items
+from typing import Any, Optional, Union
 
 
 class ScriptHandler:
@@ -40,6 +42,61 @@ class ScriptHandler:
     return script_path
 
 
+class Recursed(dict):
+
+  def __init__(self, data: Optional[Union[dict, Any]] = {}):
+    self._raw_ = data
+
+  def recourse(func):
+    def wrap(self, *args):
+      _raw_: dict = object.__getattribute__(self, "_raw_")
+      if args[0] in _raw_:
+        _val_: Any = _raw_[args[0]]
+        if isinstance(_val_, dict):
+          return Recursed(_val_)
+        return _val_
+      return func(self, *args)
+    return wrap
+
+  @recourse
+  def __getattribute__(self, *args) -> Any:
+    """
+    Override `__getitem__` method to point towards `self._raw_` while also turning any dictionary
+    values into another :class:`Recursed` Object
+    """
+    return super().__getattribute__(args[0])
+
+  @recourse
+  def __getitem__(self, *args) -> Any:
+    """
+    Override `__getitem__` method to point towards `self._raw_`
+    """
+    return super().__getitem__(args[0])
+
+  def __iter__(self):
+    """
+    Override `__iter__` method to point towards `self._raw_`
+    """
+    return iter(self._raw_.items())
+
+  def __repr__(self) -> str:
+    """
+    Override `__repr__` method to point towards `self._raw_`
+    """
+    return self._raw_.__repr__()
+
+  def items(self) -> dict_items:
+    """
+    Overrides the `items()` method, converts any dictionary objects within
+    `self._raw_` into a :class:`Recursed` Object.
+    """
+    copied: dict = dict(self._raw_)
+    for k, v in copied.items():
+      if isinstance(v, dict):
+        copied[k] = Recursed(v)
+    return copied.items()
+
+
 class Config:
   """
   Handle, Create, Read, and Generate Config Files
@@ -49,6 +106,7 @@ class Config:
   os_switch: str = 'Scripts' if os.name == "nt" else "bin"
 
   def __init__(self) -> None:
+    super().__init__()
     if not hasattr(Config, "loaded"):
       setattr(Config, "ScriptHandler", ScriptHandler)
       Config.__get_raw__()
@@ -111,6 +169,8 @@ class Config:
       cls.raw = cls.deep_update(cls.out_default, res)
 
     Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
+
+    cls.raw = Recursed(cls.raw)
 
   @classmethod
   def __exists__(cls, path: str) -> bool:

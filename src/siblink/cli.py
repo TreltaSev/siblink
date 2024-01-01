@@ -84,7 +84,7 @@ def install(local: bool = False):
 
   console.info(f"Installing siblink to global path")
 
-  __query__ = __git__ if not local else "../../"
+  __query__ = f"git+{__git__}" if not local else "../../"
 
   os.system(f"pip install {__query__}")
 

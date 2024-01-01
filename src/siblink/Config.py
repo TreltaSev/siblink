@@ -116,7 +116,7 @@ class Config(metaclass=ConfigMeta):
   Handle, Create, Read, and Generate Config Files
   used interchangeably between programs.
   """
-
+  raw = {}
   os_switch: str = 'Scripts' if os.name == "nt" else "bin"
 
   def __init__(self) -> None:
@@ -154,7 +154,6 @@ class Config(metaclass=ConfigMeta):
       quit()
 
     # Set Values
-    cls.raw = {}
     cls.venv = Path("./venv")
     cls.root = cls.venv.parent
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"

@@ -126,18 +126,18 @@ class Config(metaclass=ConfigMeta):
       Config.__get_raw__()
 
   @classmethod
-  def deep_update(cls, to_update: Union[dict, collections.abc.Mapping], data: Union[dict, collections.abc.Mapping]) -> dict:
+  def deep_update(cls, default: Union[dict, collections.abc.Mapping], inp: Union[dict, collections.abc.Mapping]) -> dict:
     """
     Recursive updating of dictionaries, used in the :method:`__get_raw__()` method.
     :arg to_update: Union[dict, collections.abc.Mapping]: The dictionary that will be updated
     :arg data: Union[dict, collections.abc.Mapping]: The dictionary that contains the data that will be implanted into :variable:`to_update`
     """
-    for k, v in data.items():
+    for k, v in inp.items():
       if isinstance(v, collections.abc.Mapping):
-        to_update[k] = cls.deep_update(to_update.get(k, {}), v)
+        default[k] = cls.deep_update(default.get(k, {}), v)
       else:
-        to_update[k] = v
-    return to_update
+        default[k] = v
+    return default
 
   @classmethod
   def __get_raw__(cls):
@@ -179,8 +179,9 @@ class Config(metaclass=ConfigMeta):
         console.warn(f"Failed to parse {(cls.root / 'config.json').absolute()}... Overwriting")
       res = {}
       Path("./config.json").write_text("{}")
-      print(cls.out_default, "default?")
       cls.raw = cls.deep_update(cls.out_default, res)
+
+    print(cls.raw, "Raw...?")
 
     Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
 

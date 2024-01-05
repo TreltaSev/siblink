@@ -59,10 +59,26 @@ def script(script_name: Annotated[Union[str, None], typer.Argument()], args: Lis
   run(Config.ScriptHandler.get(script_name), args=args)
 
 
+def siblink_index(contents: str) -> int:
+  for index, key in enumerate(contents.split("\n")):
+    if key.startswith("siblink"):
+      return index
+  return len(contents.split("\n"))
+
+
+def refactored_contents(contents: str) -> str:
+  out: list = contents.split("\n")
+  out[siblink_index(contents)] = f"siblink @ git+{__git__}"
+  return "\n".join(out)
+
+
 def __pip_dumping__(requirements_txt_path: Optional[str] = "./requirements.txt"):
   console.info(f"Dumping Modules to {requirements_txt_path}")
   command = f"{Config.pip_exe.absolute()} freeze > {requirements_txt_path}"
   os.system(command)
+
+  # Not at all confusing :)
+  Path(requirements_txt_path).write_text(refactored_contents(Path(requirements_txt_path).read_text()))
 
 
 @app.command(name="pd")

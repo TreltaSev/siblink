@@ -131,6 +131,7 @@ class Config(metaclass=ConfigMeta):
     :arg to_update: Union[dict, collections.abc.Mapping]: The dictionary that will be updated
     :arg data: Union[dict, collections.abc.Mapping]: The dictionary that contains the data that will be implanted into :variable:`to_update`
     """
+
     for k, v in inp.items():
       if isinstance(v, collections.abc.Mapping):
         default[k] = cls.deep_update(default.get(k, {}), v)
@@ -179,11 +180,9 @@ class Config(metaclass=ConfigMeta):
     res: Union[dict, None] = {}
 
     if cls.__exists__("./config.json"):
-      res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)
-      if res is None:
-        console.warn(f"Failed to parse {(cls.root / 'config.json').absolute()}... Overwriting")
-      res = {}
-      Path("./config.json").write_text("{}")
+      res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
+
+      console.info(f"[res] @deep_update:\n\n{' '*5}Default: {cls.out_default}\n\n{' '*5}Input: {res}\n\n{'='*30}\n")
       cls.raw = cls.deep_update(cls.out_default, res)
 
     console.info(f'[res] x04: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')

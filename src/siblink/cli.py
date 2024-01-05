@@ -87,9 +87,9 @@ def install():
   Installs the latest version of siblink into a python project's virtual environment as well as the global python environment
   """
   console.info(f"Installing siblink to global path")
-  subprocess.run(f"pip install -e --upgrade --force-reinstall -I git+{__git__}".split(" "), capture_output=True)
+  subprocess.run(f"pip install --upgrade --force-reinstall -I -e git+{__git__}".split(" "), capture_output=True)
   console.info(f"Installing siblink to {Config.venv.absolute()}...")
-  subprocess.run(f"{Config.pip_exe.absolute()} install -e --upgrade --force-reinstall -I git+{__git__}".split(" "), capture_output=True)
+  subprocess.run(f"{Config.pip_exe.absolute()} install --upgrade --force-reinstall -I -e git+{__git__}".split(" "), capture_output=True)
 
 
 @app.command(name="test")

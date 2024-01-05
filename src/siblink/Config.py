@@ -171,16 +171,14 @@ class Config(metaclass=ConfigMeta):
       merge = cls.__get_dict__(project_default, "project defaults")
       cls.out_default.update(merge)
 
-    # Actual Updating
+    # Updating the "default" dict with the current dict
     res: Union[dict, None] = {}
     res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
     cls.raw = cls.deep_update(cls.out_default, res)
 
+    # Check if writing is actually needed to minimize the write operations
     if not cls.raw == res:
       Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
-      console.info("Raw does not actually equal file response, writing")
-    else:
-      console.info("Raw == res :)")
 
     cls.raw = Recursed(cls.raw)
 

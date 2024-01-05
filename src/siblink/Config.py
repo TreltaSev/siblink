@@ -179,6 +179,7 @@ class Config(metaclass=ConfigMeta):
         console.warn(f"Failed to parse {(cls.root / 'config.json').absolute()}... Overwriting")
       res = {}
       Path("./config.json").write_text("{}")
+      print(cls.out_default, "default?")
       cls.raw = cls.deep_update(cls.out_default, res)
 
     Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))

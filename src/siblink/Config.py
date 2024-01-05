@@ -159,15 +159,11 @@ class Config(metaclass=ConfigMeta):
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
 
-    console.info(f'[res] x01: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
-
     # Get default.json files from package
     package_defaults: List[str] = glob.glob(f"{cls.package_root / 'defaults'}/*.default.json")
     for package_default in package_defaults:
       merge = cls.__get_dict__(package_default, "package defaults")
       cls.out_default.update(merge)
-
-    console.info(f'[res] x02: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
 
     # Get default.json files from project
     project_defaults: List[str] = glob.glob(f"{cls.root / 'defaults'}/*.default.json")
@@ -175,17 +171,10 @@ class Config(metaclass=ConfigMeta):
       merge = cls.__get_dict__(project_default, "project defaults")
       cls.out_default.update(merge)
 
-    console.info(f'[res] x03: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
-
     # Actual Updating
     res: Union[dict, None] = {}
     res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
-    console.info(f"[res] @deep_update:\n\n{' '*5}Default: {cls.out_default}\n\n{' '*5}Input: {res}\n\n{'='*30}\n")
     cls.raw = cls.deep_update(cls.out_default, res)
-
-    console.info(f'[res] x04: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
-
-    print(cls.raw, "Raw...?")
 
     Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
 

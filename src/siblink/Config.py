@@ -118,27 +118,7 @@ class ConfigMeta(type):
       return raw.__getattribute__(__name)
     return super().__getattribute__(__name)
 
-
-class ConfigStepvar:
-
-  def __init__(self, obj: callable):
-    self.obj = obj
-
-  def __getattribute__(self, __name: str) -> Any:
-    try:
-      raw: Recursed = object.__getattribute__(self, "raw")
-      if __name in raw:
-        return raw.__getattribute__(__name)
-      return super().__getattribute__(__name)
-    except:
-      return super().__getattribute__(__name)
-
-  def __call__(self, *args: Any, **kwargs: Any) -> Any:
-    self.obj(*args, **kwargs)
-
-
-@ConfigStepvar
-class Config:
+class Config(metaclass=ConfigMeta):
   """
   Handle, Create, Read, and Generate Config Files
   used interchangeably between programs.

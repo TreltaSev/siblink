@@ -104,6 +104,14 @@ class Recursed(dict):
 
 
 class ConfigMeta(type):
+  """
+  WARNING: This should be updated to a class decorator instead
+
+  This class is meant to be used as a :metaclass:, it makes the cls.raw variable
+  accessible from cls. its a simple change but this can be hard to debug and really annoying to realize.
+  Use at own risk me :)
+  """
+
   def __getattribute__(self, __name: str) -> Any:
     raw: Recursed = object.__getattribute__(self, "raw")
     if __name in raw:

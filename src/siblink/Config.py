@@ -122,7 +122,6 @@ class Config(metaclass=ConfigMeta):
   def __init__(self) -> None:
     super().__init__()
     if not hasattr(Config, "loaded"):
-      setattr(Config, "ScriptHandler", ScriptHandler)
       Config.__get_raw__()
 
   @classmethod
@@ -159,17 +158,23 @@ class Config(metaclass=ConfigMeta):
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
 
+    console.info(f'[res] x01: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
+
     # Get default.json files from package
     package_defaults: List[str] = glob.glob(f"{cls.package_root / 'defaults'}/*.default.json")
     for package_default in package_defaults:
       merge = cls.__get_dict__(package_default, "package defaults")
       cls.out_default.update(merge)
 
+    console.info(f'[res] x02: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
+
     # Get default.json files from project
     project_defaults: List[str] = glob.glob(f"{cls.root / 'defaults'}/*.default.json")
     for project_default in project_defaults:
       merge = cls.__get_dict__(project_default, "project defaults")
       cls.out_default.update(merge)
+
+    console.info(f'[res] x03: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
 
     res: Union[dict, None] = {}
 
@@ -180,6 +185,8 @@ class Config(metaclass=ConfigMeta):
       res = {}
       Path("./config.json").write_text("{}")
       cls.raw = cls.deep_update(cls.out_default, res)
+
+    console.info(f'[res] x04: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
 
     print(cls.raw, "Raw...?")
 

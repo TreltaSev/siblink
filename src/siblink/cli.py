@@ -49,7 +49,7 @@ def script(script_name: Annotated[Union[str, None], typer.Argument()], args: Lis
   :arg scripts: Parent directory of all the script files to be ran, this will most likely be used whenever the script_name you inputted isn't defined within the Config.json file`(Annotated[Optional[str], typer.Option, optional]): _description_. Defaults to None`
   """
 
-  console.fatal("This command is currently not updated and is currently disabled.")
+  console.error("This command is currently not updated and is currently disabled.")
   return
 
   if not script_name:

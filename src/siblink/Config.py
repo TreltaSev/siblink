@@ -176,7 +176,11 @@ class Config(metaclass=ConfigMeta):
     res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
     cls.raw = cls.deep_update(cls.out_default, res)
 
-    Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
+    if not cls.raw == res:
+      Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
+      console.info("Raw does not actually equal file response, writing")
+    else:
+      console.info("Raw == res :)")
 
     cls.raw = Recursed(cls.raw)
 

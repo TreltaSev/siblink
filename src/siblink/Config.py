@@ -177,13 +177,11 @@ class Config(metaclass=ConfigMeta):
 
     console.info(f'[res] x03: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
 
+    # Actual Updating
     res: Union[dict, None] = {}
-
-    if cls.__exists__("./config.json"):
-      res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
-
-      console.info(f"[res] @deep_update:\n\n{' '*5}Default: {cls.out_default}\n\n{' '*5}Input: {res}\n\n{'='*30}\n")
-      cls.raw = cls.deep_update(cls.out_default, res)
+    res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
+    console.info(f"[res] @deep_update:\n\n{' '*5}Default: {cls.out_default}\n\n{' '*5}Input: {res}\n\n{'='*30}\n")
+    cls.raw = cls.deep_update(cls.out_default, res)
 
     console.info(f'[res] x04: {cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True)}')
 

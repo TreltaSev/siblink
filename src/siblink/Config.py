@@ -118,6 +118,7 @@ class ConfigMeta(type):
       return raw.__getattribute__(__name)
     return super().__getattribute__(__name)
 
+
 class Config(metaclass=ConfigMeta):
   """
   Handle, Create, Read, and Generate Config Files
@@ -208,10 +209,10 @@ class Config(metaclass=ConfigMeta):
     """
     try:
       return json.loads(Path(path).read_text())
-    except json.JSONDecodeError as json_error:
+    except Exception as error:
       console.error(f"Failed to parse json in {Path(path).name} of {caller}")
       if raise_on_fail:
-        raise json_error
+        raise error
       if none_on_fail:
         return None
       return {}

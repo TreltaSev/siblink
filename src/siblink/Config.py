@@ -15,7 +15,7 @@ class ScriptHandler:
   def get(cls, script_name: str):
     """
     Method is used to get the path of a inputted script variable, this script variable could be a name or a direct or relative path
-    to a script. Local scripts or script names should be saved in config.json within siblink and scripts.
+    to a script. Local scripts or script names should be saved in siblink.config.json within siblink and scripts.
     :arg script_name: str: The script to be converted
     """
     parent = Config.raw["siblink"]["scripts"].get("$parent", None)
@@ -180,12 +180,12 @@ class Config(metaclass=ConfigMeta):
 
     # Updating the "default" dict with the current dict
     res: Union[dict, None] = {}
-    res = cls.__get_dict__(cls.root / "config.json", "config getter", none_on_fail=True) or {}
+    res = cls.__get_dict__(cls.root / "siblink.config.json", "config getter", none_on_fail=True) or {}
     cls.raw = cls.deep_update(cls.out_default, res)
 
     # Check if writing is actually needed to minimize the write operations
     if not cls.raw == res:
-      Path(cls.root / "config.json").write_text(json.dumps(cls.raw, indent=2))
+      Path(cls.root / "siblink.config.json").write_text(json.dumps(cls.raw, indent=2))
 
     cls.raw = Recursed(cls.raw)
 

@@ -9,39 +9,6 @@ from _collections_abc import dict_items
 from typing import Any, Optional, Union
 
 
-class ScriptHandler:
-
-  @classmethod
-  def get(cls, script_name: str):
-    """
-    Method is used to get the path of a inputted script variable, this script variable could be a name or a direct or relative path
-    to a script. Local scripts or script names should be saved in siblink.config.json within siblink and scripts.
-    :arg script_name: str: The script to be converted
-    """
-    parent = Config.raw["siblink"]["scripts"].get("$parent", None)
-
-    if not script_name in Config.raw["siblink"]["scripts"]:
-      path: Path = Path(script_name)
-
-      if not path.exists():
-        console.error(f"\"{script_name}\" is not found within {colors.vibrant_violet}siblink.conf{colors.vibrant_red} under a script header nor is it a file...")
-        quit()
-
-      return path
-
-    script_path_in_config: str = Config.raw["siblink"]["scripts"].get(script_name)
-    if parent is not None:
-      script_path_in_config = script_path_in_config.replace("$", parent, 1)
-
-    script_path: Path = Path(script_path_in_config)
-
-    if not script_path.exists():
-      console.error(f"\"{script_name}\" contains invalid or not found {colors.vibrant_violet}path{colors.vibrant_yellow} {script_path.absolute()}")
-      quit()
-
-    return script_path
-
-
 class Recursed(dict):
 
   def __init__(self, data: Optional[Union[dict, Any]] = {}):

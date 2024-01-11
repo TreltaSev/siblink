@@ -1,17 +1,18 @@
-import glob
 import os
-from pathlib import Path
-from typing import Optional, Union, List, Any
-
+import glob
 import typer
-from pyucc import console, colors, symbols
-from typing_extensions import Annotated
-from . import Config, __git__
 import subprocess
+from pathlib import Path
+from pyucc import console
+from . import Config, __git__
+from typing import Optional, Union, List
+from typing_extensions import Annotated
+
 
 app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
+@Config.load_config
 @app.command(name="run")
 def run(run_path: str, args: List[str] = []):
   """
@@ -36,6 +37,7 @@ def run(run_path: str, args: List[str] = []):
   os.system(command)
 
 
+@Config.load_config
 @app.command(name="script")
 def script(script_name: Annotated[Union[str, None], typer.Argument()], args: List[str] = []):
   """
@@ -52,12 +54,6 @@ def script(script_name: Annotated[Union[str, None], typer.Argument()], args: Lis
   console.error("This command is currently not updated and is currently disabled.")
   return
 
-  if not script_name:
-    console.warn("Missing \"script_name\" argument")
-    return
-
-  run(Config.ScriptHandler.get(script_name), args=args)
-
 
 def siblink_index(contents: str) -> int:
   for index, key in enumerate(contents.split("\n")):
@@ -72,6 +68,7 @@ def refactored_contents(contents: str) -> str:
   return "\n".join(out)
 
 
+@Config.load_config
 def __pip_dumping__(requirements_txt_path: Optional[str] = "./requirements.txt"):
   console.info(f"Dumping Modules to {requirements_txt_path}")
   command = f"{Config.pip_exe.absolute()} freeze > {requirements_txt_path}"
@@ -97,6 +94,7 @@ def pip_dump(requirements_txt_path: Optional[str] = "./requirements.txt"):
   __pip_dumping__(requirements_txt_path=requirements_txt_path)
 
 
+@Config.load_config
 @app.command(name="install")
 def install():
   """
@@ -106,14 +104,6 @@ def install():
   subprocess.run(f"pip install --upgrade --force-reinstall -I git+{__git__}".split(" "), capture_output=True)
   console.info(f"Installing siblink to {Config.venv.absolute()}...")
   subprocess.run(f"{Config.pip_exe.absolute()} install --upgrade --force-reinstall -I git+{__git__}".split(" "), capture_output=True)
-
-
-@app.command(name="test")
-def test():
-  print("testing")
-  print(Config.siblink.venv)
-  print(Config.siblink.scripts)
-  print(Config.siblink.scripts.__dict__)
 
 
 def main():

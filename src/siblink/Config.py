@@ -129,8 +129,21 @@ class Config(metaclass=ConfigMeta):
 
   def __init__(self) -> None:
     super().__init__()
-    if not hasattr(Config, "loaded"):
-      Config.__get_raw__()
+
+  @classmethod
+  def load_config(cls, func):
+    """
+    This decorator when present, checks if the config is loaded,
+    if it isn't it proceeds to load siblink.config.json into the `Config` object.
+    This is here so that you can run certain parts of any program while importing config without having
+    to always load siblink.config.json, some instances where its not present can cause problems
+    """
+
+    def decorator(*args, **kwargs):
+      if not hasattr(Config, "loaded"):
+        Config.__get_raw__()
+      return func(*args, **kwargs)
+    return decorator
 
   @classmethod
   def deep_update(cls, default: Union[dict, collections.abc.Mapping], inp: Union[dict, collections.abc.Mapping]) -> dict:
@@ -221,6 +234,3 @@ class Config(metaclass=ConfigMeta):
     raw = getattr(Config, "raw")
     if __name in raw:
       return
-
-
-Config()

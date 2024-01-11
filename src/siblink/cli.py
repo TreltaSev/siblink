@@ -100,10 +100,26 @@ def install():
   """
   Installs the latest version of siblink into a python project's virtual environment as well as the global python environment
   """
+  try:
+    console.info("About to attempt Config.venv")
+    print(Config.venv)
+  except Exception as e:
+    console.error(f"Failed ;(, {e}")
+  return
   console.info(f"Installing siblink to global path")
   subprocess.run(f"pip install --upgrade --force-reinstall -I git+{__git__}".split(" "), capture_output=True)
   console.info(f"Installing siblink to {Config.venv.absolute()}...")
   subprocess.run(f"{Config.pip_exe.absolute()} install --upgrade --force-reinstall -I git+{__git__}".split(" "), capture_output=True)
+
+
+def exper():
+  print(":)")
+  return True
+
+
+@app.command(name="test")
+def test():
+  console.info("Testing")
 
 
 def main():

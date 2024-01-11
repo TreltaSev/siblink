@@ -138,11 +138,17 @@ class Config(metaclass=ConfigMeta):
     This is here so that you can run certain parts of any program while importing config without having
     to always load siblink.config.json, some instances where its not present can cause problems
     """
+    console.info("load_config")
 
     def decorator(*args, **kwargs):
+      console.info("decorator")
       if not hasattr(Config, "loaded"):
+        console.warn("Running __get_raw__")
         Config.__get_raw__()
+      else:
+        console.warn("loaded already present...?")
       return func(*args, **kwargs)
+
     return decorator
 
   @classmethod
@@ -166,6 +172,7 @@ class Config(metaclass=ConfigMeta):
     Gets all package default.json files and project default.json files and merges them all into one dictionary.
     This dictionary is saved to :variable:`cls.raw` which can be access by a setter method.
     """
+    console.info("__get_raw__")
     cls.out_default: dict = {}
     cls.package_root = Path(__file__).parent
 
@@ -175,7 +182,9 @@ class Config(metaclass=ConfigMeta):
       quit()
 
     # Set Values
+    console.info("Venv is about to be set")
     cls.venv = Path("./venv")
+    console.info("Venv was set")
     cls.root = cls.venv.parent
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
@@ -202,6 +211,7 @@ class Config(metaclass=ConfigMeta):
       Path(cls.root / "siblink.config.json").write_text(json.dumps(cls.raw, indent=2))
 
     cls.raw = Recursed(cls.raw)
+    setattr(Config, "loaded", True)
 
   @classmethod
   def __exists__(cls, path: str) -> bool:

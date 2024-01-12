@@ -2,10 +2,6 @@ import os
 import typer
 from pyucc import console
 from pathlib import Path
-# Commands
-#   pd
-#   pip_dump
-#   test
 
 app = typer.Typer()
 

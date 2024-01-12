@@ -2,13 +2,35 @@ import os
 import typer
 from pyucc import console
 from pathlib import Path
+from typer import Option
+from typing_extensions import Annotated
 
 app = typer.Typer()
 
+def pd_logic(out: str = "./requirements.txt"):
+  console.info("[__pip_dumping__] No Logic")
 
 @app.command()
-def entry():
-  print("...")
+def pip_dump(
+  out: Annotated[str, Option(help="Path to where the the packages will be dumped")] = "./requirements.txt"
+  ):
+  """
+  Dumps all pypi packages into a requirements.txt file, or whatever --out is set to.
+  """
+  console.info("[pip_dump] No Logic")
+  pd_logic(out)
+  return
+
+@app.command()
+def pd(
+  out: Annotated[str, Option(help="Path to where the the packages will be dumped")] = "./requirements.txt"
+  ):
+  """
+  Alias to `siblink pip-dump`
+  """
+  console.info("[pd] No Logic")
+  pd_logic(out)
+  return
 
 
 @app.callback(invoke_without_command=True)

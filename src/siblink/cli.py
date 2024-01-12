@@ -17,10 +17,9 @@ def entry():
   print("...")
 
 
-@app.callback(invoke_without_command=True, context_settings={"allow_extra_args": True, "ignore_unknown_options": True, "allow_interspersed_args": True})
+@app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
   if ctx.invoked_subcommand is None:
-    console.warn("No Command Invoked")
     return
 
 

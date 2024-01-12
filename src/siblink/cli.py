@@ -3,10 +3,8 @@ import typer
 from pyucc import console
 from pathlib import Path
 # Commands
-#   run
 #   pd
 #   pip_dump
-#   install
 #   test
 
 app = typer.Typer()

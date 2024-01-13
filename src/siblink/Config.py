@@ -128,17 +128,25 @@ class Config(metaclass=ConfigMeta):
       else:
         default[k] = v
     return default
-  
+
   @classmethod
   def gather_predetermined(cls, venv_path: str = "./venv"):
     """
-    Gets predetermined values outside of siblink.config.json, including venv, root, python_exe and pip_exe
+    Gets predetermined values outside of siblink.config.json, including venv, root, python_exe and pip_exe,
+
+    Returns 0 if venv is not present, returns 1 if all ok.
     """
     cls.venv = Path(venv_path)
+
+    if not cls.venv.exists():
+      return 0
+
     cls.root = cls.venv.parent
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
     cls.package_root = Path(__file__).parent
+
+    return 1
 
   @classmethod
   def __get_raw__(cls):
@@ -148,7 +156,6 @@ class Config(metaclass=ConfigMeta):
     """
     console.info("__get_raw__")
     cls.out_default: dict = {}
-    
 
     # Check for venv
     if not cls.__exists__("./venv"):

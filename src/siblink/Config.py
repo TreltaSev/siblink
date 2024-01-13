@@ -98,7 +98,7 @@ class Config(metaclass=ConfigMeta):
     super().__init__()
 
   @classmethod
-  def load_config(cls, func):
+  def load_config(cls):
     """
     This decorator when present, checks if the config is loaded,
     if it isn't it proceeds to load siblink.config.json into the `Config` object.
@@ -107,16 +107,12 @@ class Config(metaclass=ConfigMeta):
     """
     console.info("load_config")
 
-    def decorator(*args, **kwargs):
-      console.info("decorator")
-      if not hasattr(Config, "loaded"):
-        console.warn("Running __get_raw__")
-        Config.__get_raw__()
-      else:
-        console.warn("loaded already present...?")
-      return func(*args, **kwargs)
-
-    return decorator
+    console.info("decorator")
+    if not hasattr(Config, "loaded"):
+      console.warn("Running __get_raw__")
+      Config.__get_raw__()
+    else:
+      console.warn("loaded already present...?")
 
   @classmethod
   def deep_update(cls, default: Union[dict, collections.abc.Mapping], inp: Union[dict, collections.abc.Mapping]) -> dict:

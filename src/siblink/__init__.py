@@ -1,4 +1,5 @@
-from . import register_consoles
-from .Config import Config
+from siblink import register_consoles
+from siblink.Config import Config
+
 
 __git__ = "git+https://github.com/TreltaSev/siblink.git"

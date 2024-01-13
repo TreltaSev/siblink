@@ -1,20 +1,26 @@
-from pyucc import console
 import click
+from siblink.commands.init import init
+from siblink.commands.install import install
+from siblink.commands.run import run
 
 
-@click.group
+@click.group()
 def cli():
-  console.info("[cli]")
+  """Cli Entry"""
+  pass
+
+
+# Add Commands
+cli.add_command(init)
+cli.add_command(install)
+cli.add_command(run)
 
 
 def main():
-  ### Automatic Loading of Commands ###
-  # commands_directory = Path(__file__).parent / "commands"
-  # commands = [child for child in commands_directory.iterdir() if str(child).endswith(".py")]
-  # for command_path in commands:
-  #   exec(Path(command_path).read_text())
+  """Setup.py Entry"""
   cli()
 
 
+# Run Entry
 if __name__ == "__main__":
   main()

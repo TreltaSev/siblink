@@ -7,6 +7,8 @@ from pyucc import console, colors
 from typing import Any, List, Union
 from _collections_abc import dict_items
 from typing import Any, Optional, Union
+import click
+from functools import update_wrapper
 
 
 class Recursed(dict):
@@ -97,19 +99,39 @@ class Config(metaclass=ConfigMeta):
   def __init__(self) -> None:
     super().__init__()
 
-  @classmethod
-  def load_config(cls, func):
+  @staticmethod
+  def click_forward(f):
+    @click.pass_context
+    def wrapper(ctx, *args, **kwargs):
+      return ctx.invoke(f, *args, **kwargs)
+    return update_wrapper(wrapper, f)
+
+  @staticmethod
+  def load_predetermined(f):
+    """
+    This decorator when present makes sure to run 
+    Config.gather_predetermined before running the function under it.
+    """
+    @Config.click_forward
+    def wrapper(*args, **kwargs):
+      Config.gather_predetermined()
+      return f(*args, **kwargs)
+    return update_wrapper(wrapper, f)
+
+  @staticmethod
+  def load_config(f):
     """
     This decorator when present, checks if the config is loaded,
     if it isn't it proceeds to load siblink.config.json into the `Config` object.
     This is here so that you can run certain parts of any program while importing config without having
     to always load siblink.config.json, some instances where its not present can cause problems
     """
+    @Config.click_forward
     def wrapper(*args, **kwargs):
       if not hasattr(Config, "loaded"):
         Config.__get_raw__()
-      return func(*args, **kwargs)
-    return wrapper
+      return f(*args, **kwargs)
+    return update_wrapper(wrapper, f)
 
   @classmethod
   def deep_update(cls, default: Union[dict, collections.abc.Mapping], inp: Union[dict, collections.abc.Mapping]) -> dict:

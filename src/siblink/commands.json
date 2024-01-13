@@ -1,0 +1,6 @@
+{
+  "$parent": "./commands",
+  "test": {
+    "location": "$/test.py"
+  }
+}

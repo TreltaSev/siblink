@@ -1,14 +1,14 @@
 import os
 import json
 import glob
+import click
 import collections
 from pathlib import Path
-from pyucc import console, colors
+from pyucc import console
 from typing import Any, List, Union
+from functools import update_wrapper
 from _collections_abc import dict_items
 from typing import Any, Optional, Union
-import click
-from functools import update_wrapper
 
 
 class Recursed(dict):
@@ -128,7 +128,7 @@ class Config(metaclass=ConfigMeta):
     """
     @Config.click_forward
     def wrapper(*args, **kwargs):
-      if not hasattr(Config, "loaded"):
+      if not hasattr(Config, "raw"):
         Config.__get_raw__()
       return f(*args, **kwargs)
     return update_wrapper(wrapper, f)
@@ -205,8 +205,8 @@ class Config(metaclass=ConfigMeta):
     if not cls.raw == res:
       Path(cls.root / "siblink.config.json").write_text(json.dumps(cls.raw, indent=2))
 
+    # Save raw
     cls.raw = Recursed(cls.raw)
-    setattr(Config, "loaded", True)
 
   @classmethod
   def __exists__(cls, path: str) -> bool:

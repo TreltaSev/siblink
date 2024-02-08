@@ -38,7 +38,7 @@ def run(location: str, args):
 
   command += f" {' '.join(args)}"
 
-  console.info(f"Running Command: \"{command}\"")
+  console.info(f"[run] Running Command: \"{command}\"")
 
   os.system(command=command)
   return

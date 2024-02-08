@@ -156,11 +156,12 @@ class Config(metaclass=ConfigMeta):
     Returns 0 if venv is not present, returns 1 if all ok.
     """
     cls.venv = Path(venv_path)
+    cls.root = cls.venv.parent
 
     if not cls.venv.exists():
       return 0
 
-    cls.root = cls.venv.parent
+    console.error("Ran gather_predetermined")
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
     cls.package_root = Path(__file__).parent

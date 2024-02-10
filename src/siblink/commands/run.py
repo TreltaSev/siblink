@@ -1,7 +1,7 @@
-import click
-from pyucc import console
-import pathlib
 import os
+import click
+import pathlib
+from pyucc import console
 from siblink import Config
 
 
@@ -20,7 +20,7 @@ def run(location: str, args):
   location: pathlib.Path = pathlib.Path(location)
 
   if not location.exists():
-    console.warn(f"\"{location}\" is not a valid path, please check if you've typed it correctly.")
+    console.warn(f"\"{location}\" is not a valid path, please check if you've typed it correctly. If \"{location}\" is the name of a registered script, please add the -s or --script flag to this command.")
     return
 
   gathered_python: str = Config.python_exe.absolute() if Config.venv.exists() else "python"
@@ -36,9 +36,12 @@ def run(location: str, args):
     if normal_file:
       command += str(normal_file[0])
 
+  # Add Extra Arguments to Command if present
   command += f" {' '.join(args)}"
 
+  # Notify
   console.info(f"[run] Running Command: \"{command}\"")
 
+  # Run Command
   os.system(command=command)
   return

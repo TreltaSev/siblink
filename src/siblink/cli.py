@@ -1,6 +1,5 @@
 import click
 from siblink.commands.init import init
-from siblink.commands.install import install
 from siblink.commands.run import run
 
 
@@ -12,7 +11,6 @@ def cli():
 
 # Add Commands
 cli.add_command(init)
-cli.add_command(install)
 cli.add_command(run)
 
 

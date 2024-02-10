@@ -33,8 +33,15 @@ def run(location: str, args):
   # Check if Directory search for main.py file in dir
   if location.is_dir():
     normal_file = location.glob("**/main.py")
+    magic_file = location.glob("**/__main__.py")
+
+    if magic_file:
+      command += location.absolute()
     if normal_file:
       command += str(normal_file[0])
+    else:
+      console.error(f"Inputted directory does not contain a main.py or __main__.py file, If \"{location}\" is the name of a registered script, please add the -s or --script flag to this command.")
+      return
 
   # Add Extra Arguments to Command if present
   command += f" {' '.join(args)}"

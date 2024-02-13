@@ -14,13 +14,13 @@ def info(*values, **optional):
 @console.register("error")
 def error(*values, **optional):
   time: str = optional.get("time")
-  console.cprint(f"{colors.chex('#FF3F30', 'background')} ERROR {symbols.reset}{colors.chex('#aaaaaa')} {time}{symbols.reset}{colors.chex('#FF3F30', 'foreground')}", *values)
+  console.cprint(f"{colors.chex('#FF3F30', 'background')}  ERROR {symbols.reset}{colors.chex('#aaaaaa')} {time}{symbols.reset}{colors.chex('#FF3F30', 'foreground')}", *values)
 
 
 @console.register("warn")
 def warn(*values, **optional):
   time: str = optional.get("time")
-  console.cprint(f"{colors.chex('#FF7300', 'background')} WARN {symbols.reset}{colors.chex('#aaaaaa')} {time}{symbols.reset}{colors.chex('#FF7300', 'foreground')}", *values)
+  console.cprint(f"{colors.chex('#FF7300', 'background')}  WARN  {symbols.reset}{colors.chex('#aaaaaa')} {time}{symbols.reset}{colors.chex('#FF7300', 'foreground')}", *values)
 
 
 @console.register("success")

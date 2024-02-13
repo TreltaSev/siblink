@@ -28,7 +28,7 @@ def run(location: str, args):
 
   # Append location of file
   if location.is_file():
-    command = ' '.join(command, str(location.absolute()))
+    command = ' '.join([command, str(location.absolute())])
 
   # Check if Directory search for main.py file in dir
   if location.is_dir():

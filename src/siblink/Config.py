@@ -214,7 +214,15 @@ class Config(metaclass=ConfigMeta):
     Inherited method from pathlib.Path(path).exists()
     :arg path: str: String representation of a path
     """
-    return Path(path).exists()
+    return Path(str(path)).exists()
+
+  @classmethod
+  def __absolute__(cls, path: str) -> str:
+    """
+    Inherited method from pathlib.Path(path).absolute()
+    :arg path: str: String representation of a path.
+    """
+    return Path(str(path)).absolute()
 
   @classmethod
   def __get_dict__(cls, path: Union[Path, str], caller: str = "", raise_on_fail: bool = False, none_on_fail: bool = False) -> dict:

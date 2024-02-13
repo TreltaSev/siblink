@@ -26,7 +26,7 @@ siblink --help
 
 #### Usage
 
-A package in pythons eyes is just a folder containing a `__init__.py` file, it makes variables easily discoverable between "packages". The way python knows what files it should make discoverable to you is through its built-in sys.path variable. `**siblink**` just adds one more directory, the one behind your current directory which in turn, adds your current directories' siblings together.
+A package in pythons eyes is just a folder containing a `__init__.py` file, it makes variables easily discoverable between "packages". The way python knows what files it should make discoverable to you is through its built-in sys.path variable. `**siblink**` just adds a few more directories, the one behind your current directory, as well as every directory between the `.py` file and your working directory, which in turn, adds your current directories' siblings together.
 
 Say you had two directories within the same directory.
 

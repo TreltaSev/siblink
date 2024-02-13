@@ -161,11 +161,10 @@ class Config(metaclass=ConfigMeta):
     if not cls.venv.exists():
       return 0
 
-    console.error("Ran gather_predetermined")
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
     cls.package_root = Path(__file__).parent
-
+    console.info("[Config] ran @gather_predetermined routine")
     return 1
 
   @classmethod

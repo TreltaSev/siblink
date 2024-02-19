@@ -1,45 +1,14 @@
 import os
 import json
 import glob
+import click
 import collections
 from pathlib import Path
-from pyucc import console, colors
+from pyucc import console
 from typing import Any, List, Union
+from functools import update_wrapper
 from _collections_abc import dict_items
 from typing import Any, Optional, Union
-
-
-class ScriptHandler:
-
-  @classmethod
-  def get(cls, script_name: str):
-    """
-    Method is used to get the path of a inputted script variable, this script variable could be a name or a direct or relative path
-    to a script. Local scripts or script names should be saved in siblink.config.json within siblink and scripts.
-    :arg script_name: str: The script to be converted
-    """
-    parent = Config.raw["siblink"]["scripts"].get("$parent", None)
-
-    if not script_name in Config.raw["siblink"]["scripts"]:
-      path: Path = Path(script_name)
-
-      if not path.exists():
-        console.error(f"\"{script_name}\" is not found within {colors.vibrant_violet}siblink.conf{colors.vibrant_red} under a script header nor is it a file...")
-        quit()
-
-      return path
-
-    script_path_in_config: str = Config.raw["siblink"]["scripts"].get(script_name)
-    if parent is not None:
-      script_path_in_config = script_path_in_config.replace("$", parent, 1)
-
-    script_path: Path = Path(script_path_in_config)
-
-    if not script_path.exists():
-      console.error(f"\"{script_name}\" contains invalid or not found {colors.vibrant_violet}path{colors.vibrant_yellow} {script_path.absolute()}")
-      quit()
-
-    return script_path
 
 
 class Recursed(dict):
@@ -130,26 +99,38 @@ class Config(metaclass=ConfigMeta):
   def __init__(self) -> None:
     super().__init__()
 
-  @classmethod
-  def load_config(cls, func):
+  @staticmethod
+  def click_forward(f):
+    @click.pass_context
+    def wrapper(ctx, *args, **kwargs):
+      return ctx.invoke(f, *args, **kwargs)
+    return update_wrapper(wrapper, f)
+
+  @staticmethod
+  def load_predetermined(f):
+    """
+    This decorator when present makes sure to run 
+    Config.gather_predetermined before running the function under it.
+    """
+    @Config.click_forward
+    def wrapper(*args, **kwargs):
+      Config.gather_predetermined()
+      return f(*args, **kwargs)
+    return update_wrapper(wrapper, f)
+
+  @staticmethod
+  def load_config(f):
     """
     This decorator when present, checks if the config is loaded,
     if it isn't it proceeds to load siblink.config.json into the `Config` object.
     This is here so that you can run certain parts of any program while importing config without having
     to always load siblink.config.json, some instances where its not present can cause problems
     """
-    console.info("load_config")
-
-    def decorator(*args, **kwargs):
-      console.info("decorator")
-      if not hasattr(Config, "loaded"):
-        console.warn("Running __get_raw__")
-        Config.__get_raw__()
-      else:
-        console.warn("loaded already present...?")
-      return func(*args, **kwargs)
-
-    return decorator
+    @Config.click_forward
+    def wrapper(*args, **kwargs):
+      Config.__get_raw__()
+      return f(*args, **kwargs)
+    return update_wrapper(wrapper, f)
 
   @classmethod
   def deep_update(cls, default: Union[dict, collections.abc.Mapping], inp: Union[dict, collections.abc.Mapping]) -> dict:
@@ -167,6 +148,25 @@ class Config(metaclass=ConfigMeta):
     return default
 
   @classmethod
+  def gather_predetermined(cls, venv_path: str = "./venv"):
+    """
+    Gets predetermined values outside of siblink.config.json, including venv, root, python_exe and pip_exe,
+
+    Returns 0 if venv is not present, returns 1 if all ok.
+    """
+    cls.venv = Path(venv_path)
+    cls.root = cls.venv.parent
+
+    if not cls.venv.exists():
+      return 0
+
+    cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
+    cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
+    cls.package_root = Path(__file__).parent
+    console.info("[Config] ran @gather_predetermined routine")
+    return 1
+
+  @classmethod
   def __get_raw__(cls):
     """
     Gets all package default.json files and project default.json files and merges them all into one dictionary.
@@ -174,20 +174,15 @@ class Config(metaclass=ConfigMeta):
     """
     console.info("__get_raw__")
     cls.out_default: dict = {}
-    cls.package_root = Path(__file__).parent
 
     # Check for venv
     if not cls.__exists__("./venv"):
-      console.error(f"No \"Venv\" dir found in root, this is needed to run siblink at all...")
-      quit()
+      console.warn(f"No discoverable virtual-env in current path, halting config generation.")
+      return
 
     # Set Values
-    console.info("Venv is about to be set")
-    cls.venv = Path("./venv")
-    console.info("Venv was set")
-    cls.root = cls.venv.parent
-    cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
-    cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
+    if not hasattr(cls, "root"):
+      cls.gather_predetermined()
 
     # Get default.json files from package
     package_defaults: List[str] = glob.glob(f"{cls.package_root / 'defaults'}/*.default.json")
@@ -210,8 +205,8 @@ class Config(metaclass=ConfigMeta):
     if not cls.raw == res:
       Path(cls.root / "siblink.config.json").write_text(json.dumps(cls.raw, indent=2))
 
+    # Save raw
     cls.raw = Recursed(cls.raw)
-    setattr(Config, "loaded", True)
 
   @classmethod
   def __exists__(cls, path: str) -> bool:
@@ -219,7 +214,15 @@ class Config(metaclass=ConfigMeta):
     Inherited method from pathlib.Path(path).exists()
     :arg path: str: String representation of a path
     """
-    return Path(path).exists()
+    return Path(str(path)).exists()
+
+  @classmethod
+  def __absolute__(cls, path: str) -> str:
+    """
+    Inherited method from pathlib.Path(path).absolute()
+    :arg path: str: String representation of a path.
+    """
+    return str(Path(str(path)).absolute())
 
   @classmethod
   def __get_dict__(cls, path: Union[Path, str], caller: str = "", raise_on_fail: bool = False, none_on_fail: bool = False) -> dict:
@@ -233,7 +236,6 @@ class Config(metaclass=ConfigMeta):
     try:
       return json.loads(Path(path).read_text())
     except Exception as error:
-      console.error(f"Failed to parse json in {Path(path).name} of {caller}")
       if raise_on_fail:
         raise error
       if none_on_fail:

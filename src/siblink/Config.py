@@ -177,7 +177,7 @@ class Config(metaclass=ConfigMeta):
 
     # Check for venv
     if not cls.__exists__("./venv"):
-      console.warn(f"No \"venv\" directory found in `root`, config generation has been halted. Consider running `siblink init`")
+      console.warn(f"No discoverable virtual-env in current path, halting config generation.")
       return
 
     # Set Values

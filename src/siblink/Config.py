@@ -128,8 +128,7 @@ class Config(metaclass=ConfigMeta):
     """
     @Config.click_forward
     def wrapper(*args, **kwargs):
-      if not hasattr(Config, "raw"):
-        Config.__get_raw__()
+      Config.__get_raw__()
       return f(*args, **kwargs)
     return update_wrapper(wrapper, f)
 

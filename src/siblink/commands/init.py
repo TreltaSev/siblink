@@ -11,7 +11,9 @@ import datetime
 @Config.load_predetermined
 def init():
   """
-  [init] Testing Documentation
+  [init] Initializes a python project and installs 
+  all required packages and virtual environments
+  for siblink to work seamlessly.
   """
   # [Start of Time]
   tick = datetime.datetime.now()

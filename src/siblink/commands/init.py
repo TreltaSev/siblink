@@ -9,6 +9,7 @@ import datetime
 
 @click.command()
 @Config.load_predetermined
+@Config.load_config
 def init():
   """
   [init] Initializes a python project and installs 

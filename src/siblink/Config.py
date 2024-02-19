@@ -178,8 +178,8 @@ class Config(metaclass=ConfigMeta):
 
     # Check for venv
     if not cls.__exists__("./venv"):
-      console.error(f"No \"Venv\" dir found in root, this is needed to run siblink at all...")
-      quit()
+      console.warn(f"No \"venv\" directory found in `root`, config generation has been halted. Consider running `siblink init`")
+      return
 
     # Set Values
     cls.gather_predetermined()

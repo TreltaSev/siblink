@@ -7,6 +7,7 @@ from siblink import Config, Command
 
 @click.command()
 @click.argument("location")
+@Config.click_forward
 @Config.load_predetermined
 @Config.load_config
 def run(location: str):

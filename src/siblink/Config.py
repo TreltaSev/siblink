@@ -112,7 +112,6 @@ class Config(metaclass=ConfigMeta):
     This decorator when present makes sure to run 
     Config.gather_predetermined before running the function under it.
     """
-    @Config.click_forward
     def wrapper(*args, **kwargs):
       Config.gather_predetermined()
       return f(*args, **kwargs)
@@ -126,7 +125,6 @@ class Config(metaclass=ConfigMeta):
     This is here so that you can run certain parts of any program while importing config without having
     to always load siblink.config.json, some instances where its not present can cause problems
     """
-    @Config.click_forward
     def wrapper(*args, **kwargs):
       Config.__get_raw__()
       return f(*args, **kwargs)

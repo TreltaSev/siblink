@@ -181,7 +181,8 @@ class Config(metaclass=ConfigMeta):
       return
 
     # Set Values
-    cls.gather_predetermined()
+    if not hasattr(cls, "root"):
+      cls.gather_predetermined()
 
     # Get default.json files from package
     package_defaults: List[str] = glob.glob(f"{cls.package_root / 'defaults'}/*.default.json")
@@ -235,7 +236,6 @@ class Config(metaclass=ConfigMeta):
     try:
       return json.loads(Path(path).read_text())
     except Exception as error:
-      console.error(f"Failed to parse json in {Path(path).name} of {caller}")
       if raise_on_fail:
         raise error
       if none_on_fail:

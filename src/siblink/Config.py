@@ -161,7 +161,6 @@ class Config(metaclass=ConfigMeta):
     cls.python_exe: Path = cls.venv / cls.os_switch / "python.exe"
     cls.pip_exe: Path = cls.venv / cls.os_switch / "pip.exe"
     cls.package_root = Path(__file__).parent
-    console.info("[Config] ran @gather_predetermined routine")
     return 1
 
   @classmethod
@@ -170,7 +169,6 @@ class Config(metaclass=ConfigMeta):
     Gets all package default.json files and project default.json files and merges them all into one dictionary.
     This dictionary is saved to :variable:`cls.raw` which can be access by a setter method.
     """
-    console.info("__get_raw__")
     cls.out_default: dict = {}
 
     # Check for venv

@@ -1,10 +1,11 @@
-from typing import List, Union
+from typing import List, Union, Literal
 from siblink import Config
 from pyucc import console
 import pathlib
+import os
 
 
-class RunScaffold(str):
+class RunScaffold:
 
   """
   Object used to create, mutate, and save the run command that makes siblink work.
@@ -12,8 +13,14 @@ class RunScaffold(str):
   to be ran before.
   """
 
-  def __init__(self, location: str):
-    self.location: str = location
+  def __init__(self, location: str, prioritize_script: bool = False):
+
+    self.location = location
+    self.prioritize_script = prioritize_script
+
+    if self.logic is "script":
+      return
+
     self.paths: List[str] = []
     self.python: str = ""
 
@@ -23,12 +30,57 @@ class RunScaffold(str):
     self.__add_path__(Config.root)
     self.__add_path__(self.__subtract_commons__(location, pathlib.Path(".")))
 
+  @property
+  def logic(self) -> Literal["script", "python"]:
+    if (not self.location_exists and self.is_script) or (self.location_exists and self.is_script and self.prioritize_script):
+      return "script"
+    return "python"
+
   def generate(self) -> str:
     """
-    Generates the run command and returns a string
+    If the present logic is "script", this method will return the script command listed within siblink.config.json,
+    if the present logic is "python", this method will return a command that sets the environment label and runs a python-esc.
+
     :return: str: Run command
     """
+
+    if self.logic is "script":
+      return self.get_script()
+
     return f"set PYTHONPATH=%PYTHONPATH%;{';'.join(self.paths)} & {self.python} -B {self.location}"
+
+  def get_script(self) -> None:
+
+    # Check if config has scripts key
+    if not hasattr(Config, "scripts"):
+      raise NotImplementedError(f"No script key found in config.")
+
+    if hasattr(Config.scripts, self.location):
+      command = getattr(Config.scripts, self.location)
+
+    return command
+
+  @property
+  def is_script(self) -> bool:
+    """
+    Checks if :arg:`self.location` is a registered script name
+
+    :return: bool: True/False
+    """
+    try:
+      return hasattr(Config.scripts, self.location)
+    except Exception:
+      return False
+
+  @property
+  def location_exists(self) -> bool:
+    """
+    returns bool representing if self.location is a valid file or directory
+    """
+    try:
+      return pathlib.Path(self.location).exists()
+    except Exception:
+      return False
 
   def __gather_python__(self) -> None:
     """
@@ -44,22 +96,22 @@ class RunScaffold(str):
     location: pathlib.Path = pathlib.Path(str(self.location))
 
     if not location.exists():
-      console.warn(f"\"{location}\" is not a valid path, please check if you've typed it correctly. If \"{self.location}\" is the name of a registered script, please add the -s or --script flag to this command.")
+      console.warn(f"\"{location}\" is not a valid path, please check if you've typed it correctly.")
       quit()
 
     if location.is_file():
       self.location = Config.__absolute__(self.location)
 
     if location.is_dir():
-      normal_file = next(self.location.glob("**/main.py"), None)
-      magic_file = next(self.location.glob("**/__main__.py"), None)
+      normal_file = next(location.glob("**/main.py"), None)
+      magic_file = next(location.glob("**/__main__.py"), None)
 
       if magic_file is not None:
         self.location = str(Config.__absolute__(magic_file))
-      if normal_file is not None:
+      elif normal_file is not None:
         self.location = str(Config.__absolute__(normal_file))
       else:
-        console.error(f"Inputted directory does not contain a main.py or __main__.py file, If \"{self.location}\" is the name of a registered script, please add the -s or --script flag to this command.")
+        console.error(f"Inputted directory \"{self.location}\" does not contain a main.py or __main__.py file")
         quit()
 
   def __add_path__(self, path: Union[List[str], str, pathlib.Path]):

@@ -13,10 +13,11 @@ class RunScaffold:
   to be ran before.
   """
 
-  def __init__(self, location: str, prioritize_script: bool = False):
+  def __init__(self, location: str, prioritize_script: bool = False, args: list = []):
 
     self.location = location
     self.prioritize_script = prioritize_script
+    self.args = args
 
     if self.logic is "script":
       return
@@ -47,7 +48,7 @@ class RunScaffold:
     if self.logic is "script":
       return self.get_script()
 
-    return f"set PYTHONPATH=%PYTHONPATH%;{';'.join(self.paths)} & {self.python} -B {self.location}"
+    return f"set PYTHONPATH=%PYTHONPATH%;{';'.join(self.paths)} & {self.python} -B {self.location} {' '.join(self.args)}"
 
   def get_script(self) -> None:
 
@@ -96,7 +97,7 @@ class RunScaffold:
     location: pathlib.Path = pathlib.Path(str(self.location))
 
     if not location.exists():
-      console.warn(f"\"{location}\" is not a valid path, please check if you've typed it correctly.")
+      console.warn(f"\"{location}\" is not a valid path, please check if you've typed it correctly. If \"{self.location}\" is the name of a registered script, please add the -s or --script flag to this command.")
       quit()
 
     if location.is_file():

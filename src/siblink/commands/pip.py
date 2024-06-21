@@ -41,7 +41,7 @@ def pip(venv, debug, args):
     con_info("Handling Venv Assignment", show=debug)
     out.append(f"set PYTHONPATH=%PYTHONPATH%;{';'.join(scaffold.paths)}")
 
-  if args[0] == "dump":
+  if args[1] == "dump":
     _file = args[1] or "requirements.txt"
     con_start(f"Dumping to {colors.vibrant_violet}{_file}")
     out.append(f"pip freeze > {_file}")

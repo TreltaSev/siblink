@@ -13,7 +13,7 @@ class RunScaffold:
   to be ran before.
   """
 
-  def __init__(self, location: str, prioritize_script: bool = False, args: list = []):
+  def __init__(self, location: str | None, prioritize_script: bool = False, args: list = []):
 
     self.location = location
     self.prioritize_script = prioritize_script
@@ -94,6 +94,9 @@ class RunScaffold:
     Attempts to get the path for the script the user is running, whether its a package
     or a file. Contains error handling.
     """
+
+    if not self.location:
+      return
     location: pathlib.Path = pathlib.Path(str(self.location))
 
     if not location.exists():
@@ -156,6 +159,8 @@ class RunScaffold:
     :arg path: The path with branching
     :arg compare: the path to compare against.
     """
+    if not path:
+      path = pathlib.Path(".").absolute()
     path = Config.__absolute__(path)
     compare = Config.__absolute__(compare)
 

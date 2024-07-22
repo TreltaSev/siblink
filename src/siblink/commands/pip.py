@@ -48,11 +48,11 @@ def pip(venv, debug, args):
       _file = "requirements.txt"
 
     con_start(f"Dumping to {colors.vibrant_violet}{_file}")
-    out.append(f"pip freeze > {_file}")
+    out.append(f"{scaffold.pip} freeze > {_file}")
     os.system(command=' & '.join(out))
     quit()
 
-  out.append(f"pip {' '.join(args)}")
+  out.append(f"{scaffold.pip} {' '.join(args)}")
 
   command = ' & '.join(out)
 

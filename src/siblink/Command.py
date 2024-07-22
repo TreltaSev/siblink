@@ -107,9 +107,8 @@ class RunScaffold:
       self.location = Config.__absolute__(self.location)
 
     if location.is_dir():
-      normal_file = next(location.glob("**/main.py"), None)
-      magic_file = next(location.glob("**/__main__.py"), None)
-
+      normal_file = next(location.glob("main.py"), None)
+      magic_file = next(location.glob("__main__.py"), None)
       if magic_file is not None:
         self.location = str(Config.__absolute__(magic_file))
       elif normal_file is not None:

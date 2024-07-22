@@ -27,6 +27,7 @@ class RunScaffold:
 
     self.__get_script_location__()
     self.__gather_python__()
+    self.__gather_pip__()
 
     self.__add_path__(Config.root)
     self.__add_path__(self.__subtract_commons__(location, pathlib.Path(".")))
@@ -88,6 +89,12 @@ class RunScaffold:
     Gets location of python command
     """
     self.python = Config.python_exe.absolute() if Config.venv.exists() else "python"
+
+  def __gather_pip__(self) -> None:
+    """
+    Gets location of pip command
+    """
+    self.pip = Config.pip_exe.absolute() if Config.venv.exists() else "pip"
 
   def __get_script_location__(self) -> None:
     """

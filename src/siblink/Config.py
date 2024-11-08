@@ -158,11 +158,11 @@ class Config(metaclass=ConfigMeta):
 
     if not cls.venv.exists():
       return 0
-    
+
     isWindows: bool = sys.platform == "win32"
 
-    cls.python_exe: Path = cls.venv / cls.os_switch / "python" + ".exe" if isWindows else "" 
-    cls.pip_exe: Path = cls.venv / cls.os_switch / "pip" + ".exe" if isWindows else ""
+    cls.python_exe: Path = cls.venv / cls.os_switch / ("python" + ".exe" if isWindows else "")
+    cls.pip_exe: Path = cls.venv / cls.os_switch / ("pip" + ".exe" if isWindows else "")
     cls.package_root = Path(__file__).parent
     return 1
 

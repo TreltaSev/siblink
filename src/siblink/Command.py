@@ -45,7 +45,6 @@ class RunScaffold:
 
     :return: str: Run command
     """
-    console.info(Config.os)
     if self.logic is "script":
       return self.get_script()
     if Config.os == "win32":

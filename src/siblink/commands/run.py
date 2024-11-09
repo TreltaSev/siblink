@@ -29,6 +29,7 @@ def run(location: str, ps: bool, args: list):
   command = Command.RunScaffold(location, ps, args).generate()
 
   # Notify
+  print(f"::: {Config.os} ::: {Config.__dict__}")
   console.info(f"[run] Running Command: \"{command}\"")
 
   # Run Command

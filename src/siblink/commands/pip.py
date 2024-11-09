@@ -39,7 +39,12 @@ def pip(venv, debug, args):
 
   if venv:
     con_info("Handling Venv Assignment", show=debug)
-    out.append(f"set PYTHONPATH=%PYTHONPATH%;{';'.join(scaffold.paths)}")
+
+    if Config.os == "win32":
+      out.append(f"set PYTHONPATH=%PYTHONPATH%;{';'.join(scaffold.paths)}")
+    else:
+      out.append(f"export PYTHONPATH=\"$PYTHONPATH:{':'.join(scaffold.paths)}\"")
+
   if args[0] == "dump":
 
     try:
@@ -54,7 +59,10 @@ def pip(venv, debug, args):
 
   out.append(f"{scaffold.pip} {' '.join(args)}")
 
-  command = ' & '.join(out)
+  if Config.os == "win32":
+    command = ' & '.join(out)
+  else:
+    command = ' ; '.join(out)
 
   con_done(f"Command Running, {colors.vibrant_violet}{command}", show=True)
 

@@ -6,7 +6,7 @@ import click
 import collections
 from pathlib import Path
 from pyucc import console
-from typing import Any, List, Union
+from typing import Any, List, Union, Literal
 from functools import update_wrapper
 from _collections_abc import dict_items
 from typing import Any, Optional, Union
@@ -96,6 +96,7 @@ class Config(metaclass=ConfigMeta):
   """
   raw = {}
   os_switch: str = 'Scripts' if os.name == "nt" else "bin"
+  os: Literal["win32", "linux", "linux2", "cygwin", "msys", "darwin", "os2", "os2emx", "riscos"]
 
   def __init__(self) -> None:
     super().__init__()
@@ -164,6 +165,15 @@ class Config(metaclass=ConfigMeta):
     cls.python_exe: Path = cls.venv / cls.os_switch / ("python" + ".exe" if isWindows else "")
     cls.pip_exe: Path = cls.venv / cls.os_switch / ("pip" + ".exe" if isWindows else "")
     cls.package_root = Path(__file__).parent
+
+    # Determine OS
+    _os = ""
+    if sys.platform in ["linux", "linux2"]:
+      _os = "linux"
+    else:
+      _os = sys.platform
+
+    cls.os = _os
     return 1
 
   @classmethod

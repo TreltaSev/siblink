@@ -51,7 +51,7 @@ class RunScaffold:
 
     if Config.os == "win32":
       return f"set PYTHONPATH=%PYTHONPATH%;{';'.join(self.paths)} & {self.python} -B {self.location} {' '.join(self.args)}"
-    return f"set PYTHONPATH=$PYTHONPATH:{':'.join(self.paths)} & {self.python} -B {self.location} {' '.join(self.args)}"
+    return f"export PYTHONPATH=\"$PYTHONPATH:{':'.join(self.paths)}\" && {self.python} -B {self.location} {' '.join(self.args)}"
 
   def get_script(self) -> None:
 

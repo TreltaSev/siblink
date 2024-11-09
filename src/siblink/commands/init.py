@@ -31,7 +31,7 @@ def init():
   # Install all modules in requirements.txt if its present
   if Path("./requirements.txt").exists():
     console.info("[init] requirements.txt file found, installing packages...")
-    console.warn(f"[output check] {Config} {Config.pip_exe}\n", f"{Config.pip_exe} install -r ./requirements.txt".split(" "))
+    print(f"[output check] {Config} {Config.pip_exe}\n", f"{Config.pip_exe} install -r ./requirements.txt".split(" "))
     subprocess.run(f"{Config.pip_exe} install -r ./requirements.txt".split(" "), capture_output=True)
     console.success("[init] Installed Packages")
 

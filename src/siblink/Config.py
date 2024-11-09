@@ -157,6 +157,13 @@ class Config(metaclass=ConfigMeta):
     cls.venv = Path(venv_path)
     cls.root = cls.venv.parent
 
+    # Determine OS
+    _os = ""
+    if sys.platform in ["linux", "linux2"]:
+      _os = "linux"
+    else:
+      _os = sys.platform
+
     if not cls.venv.exists():
       return 0
 
@@ -165,13 +172,6 @@ class Config(metaclass=ConfigMeta):
     cls.python_exe: Path = cls.venv / cls.os_switch / ("python" + (".exe" if isWindows else ""))
     cls.pip_exe: Path = cls.venv / cls.os_switch / ("pip" + (".exe" if isWindows else ""))
     cls.package_root = Path(__file__).parent
-
-    # Determine OS
-    _os = ""
-    if sys.platform in ["linux", "linux2"]:
-      _os = "linux"
-    else:
-      _os = sys.platform
 
     cls.os = _os
     return 1

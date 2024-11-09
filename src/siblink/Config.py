@@ -163,6 +163,7 @@ class Config(metaclass=ConfigMeta):
       _os = "linux"
     else:
       _os = sys.platform
+    cls.os = _os
 
     if not cls.venv.exists():
       return 0
@@ -173,7 +174,6 @@ class Config(metaclass=ConfigMeta):
     cls.pip_exe: Path = cls.venv / cls.os_switch / ("pip" + (".exe" if isWindows else ""))
     cls.package_root = Path(__file__).parent
 
-    cls.os = _os
     return 1
 
   @classmethod

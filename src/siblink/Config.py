@@ -86,7 +86,10 @@ class ConfigMeta(type):
     raw: Recursed = object.__getattribute__(self, "raw")
     if __name in raw:
       return raw.__getattribute__(__name)
-    return super().__getattribute__(__name)
+    try:
+      return super().__getattribute__(__name)
+    except AttributeError:
+      return None
 
 
 class Config(metaclass=ConfigMeta):

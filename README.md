@@ -1,11 +1,11 @@
 # siblink - a Python sibling package linker
 
-![Version Badge](https://badgen.net/badge/version/1.1.0/blue?icon=github)
+![Version Badge](https://badgen.net/badge/version/1.2.1/blue?icon=github)
 
 ### Installation
 
 ```bash
-pip install git+https://github.com/TreltaSev/siblink.git
+pip install siblink
 ```
 
 **OR**

@@ -2,7 +2,6 @@ from typing import List, Union, Literal
 from siblink import Config
 from pyucc import console
 import pathlib
-import os
 
 
 class RunScaffold:

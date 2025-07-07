@@ -1,12 +1,20 @@
-import setuptools
+from setuptools import setup, find_packages
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 
-setuptools.setup(
+__longdescription = open("README.md", 'r').read()
+
+setup(
     name="siblink",
     version=__version__,
-    description="Sibling Link for trelbot's packages.",
+    description="Sibling Link for python packages.",
+    long_description=__longdescription,
+    long_description_content_type="text/markdown",
     author="Trelta",
+    author_email="treltasev@gmail.com",
+    url="https://github.com/treltasev/siblink",
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

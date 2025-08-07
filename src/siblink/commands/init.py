@@ -29,7 +29,7 @@ def init():
     Config.gather_predetermined()
 
   console.info(f"[init] installing siblink in Virtual Environment")
-  subprocess.run(f"{Config.pip_exe.absolute()} install --upgrade --force-reinstall -I {__git__}".split(" "), capture_output=True)
+  subprocess.run(f"{Config.pip_exe.absolute()} install siblink".split(" "), capture_output=True)
 
   # Install all modules in requirements.txt if its present
   if Path("./requirements.txt").exists():

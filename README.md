@@ -1,6 +1,6 @@
 # siblink - a Python sibling package linker
 
-![Version Badge](https://badgen.net/badge/version/1.2.1/blue?icon=github)
+![Version Badge](https://badgen.net/badge/version/1.2.2/blue?icon=github)
 
 ### Installation
 
